@@ -9,7 +9,8 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256))
+    # Increased to 256 to handle modern secure hashes (scrypt/bcrypt)
+    password_hash = db.Column(db.String(256)) 
     
     # ROLE SYSTEM: 'user' for members, 'admin' for you
     role = db.Column(db.String(20), default='user') 
@@ -41,8 +42,10 @@ class ClothingItem(db.Model):
     times_worn = db.Column(db.Integer, default=0)
 
     # --- AI VISION FIELDS ---
-    celeb_twin = db.Column(db.String(100), nullable=True)
-    styling_tip = db.Column(db.Text, nullable=True)
+    # Increased to 256 because AI sometimes gives long celebrity comparisons
+    celeb_twin = db.Column(db.String(256), nullable=True) 
+    # db.Text allows for long, detailed AI styling advice without crashing
+    styling_tip = db.Column(db.Text, nullable=True) 
 
     # --- USER RELATIONSHIP ---
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

@@ -2,7 +2,25 @@
 {% block content %}
 <div class="max-w-md mx-auto py-12 px-4">
     <h2 class="text-2xl font-bold mb-8">Edit Item</h2>
+    
+    <div class="mb-6">
+        <label class="block text-xs font-bold uppercase mb-2">Current Image</label>
+        <div class="relative group">
+            <img id="imagePreview" 
+                 src="{{ url_for('static', filename='uploads/' + item.image_file) }}" 
+                 alt="{{ item.name }}" 
+                 class="w-full h-64 object-cover rounded-xl border shadow-sm">
+        </div>
+    </div>
+
     <form action="{{ url_for('wardrobe.edit', id=item.id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        
+        <div class="mb-4">
+            <label class="block text-xs font-bold uppercase mb-1">Replace Image</label>
+            <input type="file" name="image" id="imageInput" accept="image/*"
+                   class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 cursor:pointer">
+        </div>
+
         <div>
             <label class="block text-xs font-bold uppercase mb-1">Name</label>
             <input type="text" name="name" value="{{ item.name }}" class="w-full border p-3 rounded-lg" required>
@@ -30,6 +48,19 @@
         <button type="submit" class="w-full bg-black text-white py-4 rounded-lg font-bold hover:bg-gray-800 transition-colors">
             Update Item
         </button>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('wardrobe.detail', id=item.id) }}" class="text-gray-500 text-sm hover:underline">Cancel & Go Back</a>
+        </div>
     </form>
 </div>
+
+<script>
+    document.getElementById('imageInput').onchange = evt => {
+        const [file] = document.getElementById('imageInput').files
+        if (file) {
+            document.getElementById('imagePreview').src = URL.createObjectURL(file)
+        }
+    }
+</script>
 {% endblock %}

@@ -3,7 +3,7 @@ from flask import (
     Blueprint, render_template, request, redirect, 
     url_for, flash, current_app
 )
-from flask_login import login_required, current_user # Added for Auth
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from rewear_ai.wardrobe.models import ClothingItem
 from rewear_ai.app import db
@@ -15,14 +15,13 @@ wardrobe = Blueprint(
     template_folder='templates'
 )
 
-# 📌 VIEW ALL & SEARCH (Filtered by User)
+# 📌 VIEW ALL & SEARCH
 @wardrobe.route('/')
-@login_required # Must be logged in
+@login_required
 def index():
     search_query = request.args.get('q', '')
     category_filter = request.args.get('cat', '')
     
-    # 🛡️ ONLY get items belonging to the current user
     query = ClothingItem.query.filter_by(user_id=current_user.id)
 
     if search_query:
@@ -32,7 +31,6 @@ def index():
 
     items = query.all()
     
-    # --- SUSTAINABILITY LOGIC ---
     total_wears = sum(item.times_worn for item in items)
     co2_saved = round(total_wears * 0.5, 1)
     
@@ -45,11 +43,10 @@ def index():
 @wardrobe.route('/item/<int:id>')
 @login_required
 def detail(id):
-    # Ensure a user can't peek at someone else's item via ID
     item = ClothingItem.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     return render_template('wardrobe/detail.html', item=item)
 
-# 📌 ADD ITEM (Linked to User)
+# 📌 ADD ITEM
 @wardrobe.route('/add', methods=['GET', 'POST'])
 @login_required
 def add():
@@ -79,11 +76,8 @@ def add():
 
         ai_results = analyze_clothing_image(saved_path)
         if ai_results:
-            if not category or category == "Other": 
-                category = ai_results.get('category', category)
-            if not color:
-                color = ai_results.get('color', color)
-            
+            category = category or ai_results.get('category')
+            color = color or ai_results.get('color')
             celeb_twin = ai_results.get('celeb_twin', celeb_twin)
             styling_tip = ai_results.get('styling_tip', styling_tip)
 
@@ -91,7 +85,6 @@ def add():
         flash('Name and Category are required', 'danger')
         return redirect(url_for('wardrobe.add'))
 
-    # 🛡️ ASSIGN user_id to the new item
     item = ClothingItem(
         name=name, 
         category=category, 
@@ -101,25 +94,27 @@ def add():
         image_file=filename,
         celeb_twin=celeb_twin,
         styling_tip=styling_tip,
-        user_id=current_user.id # Linking to the logged-in user
+        user_id=current_user.id
     )
 
     db.session.add(item)
     db.session.commit()
-    flash(f"Success! Gemini matched this to {celeb_twin}'s style and added it to your wardrobe.")
+    flash(f"Success! Gemini matched this to {celeb_twin}'s style.")
     return redirect(url_for('wardrobe.index'))
 
-# 📌 EDIT ITEM
+# 📌 EDIT ITEM (With Integrity Error Protection)
 @wardrobe.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit(id):
     item = ClothingItem.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+    
     if request.method == 'POST':
-        item.name = request.form.get('name')
-        item.category = request.form.get('category')
-        item.color = request.form.get('color')
-        item.season = request.form.get('season')
-        item.occasion = request.form.get('occasion')
+        # Safety Logic: Use 'or item.x' so if form is blank, it doesn't save as NULL
+        item.name = request.form.get('name') or item.name
+        item.category = request.form.get('category') or item.category
+        item.color = request.form.get('color') or item.color
+        item.season = request.form.get('season') or item.season
+        item.occasion = request.form.get('occasion') or item.occasion
         
         file = request.files.get('image')
         if file and file.filename != '':
@@ -127,9 +122,14 @@ def edit(id):
             file.save(os.path.join(current_app.static_folder, 'uploads', filename))
             item.image_file = filename
             
-        db.session.commit()
-        flash('Item updated!', 'success')
-        return redirect(url_for('wardrobe.detail', id=item.id))
+        try:
+            db.session.commit()
+            flash('Item updated successfully!', 'success')
+            return redirect(url_for('wardrobe.detail', id=item.id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error: {str(e)}', 'danger')
+            
     return render_template('wardrobe/edit.html', item=item)
 
 # 📌 DELETE ITEM
@@ -137,7 +137,6 @@ def edit(id):
 @login_required
 def delete(id):
     item = ClothingItem.query.filter_by(id=id, user_id=current_user.id).first_or_404()
-    
     if item.image_file and item.image_file != 'default.jpg':
         file_path = os.path.join(current_app.static_folder, 'uploads', item.image_file)
         if os.path.exists(file_path):
@@ -145,5 +144,5 @@ def delete(id):
 
     db.session.delete(item)
     db.session.commit()
-    flash('Item removed from wardrobe', 'success')
+    flash('Item removed', 'success')
     return redirect(url_for('wardrobe.index'))
