@@ -50,16 +50,14 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
-    # --- THE CRITICAL FIX: IMPORT ALL MODELS FOR TABLE CREATION ---
+    # --- THE CRITICAL FIX: IMPORT CORRECT MODEL NAMES ---
     with app.app_context():
-        # We import every model file so SQLAlchemy registers the tables
-        from rewear_ai.wardrobe.models import User, Item
-        from rewear_ai.outfit.models import Outfit
-        from rewear_ai.donate.models import Donation
+        # Match these to your wardrobe/models.py
+        from rewear_ai.wardrobe.models import User, ClothingItem, Charity, DonationRecord
         
-        # This will now create ALL tables in the Postgres DB
+        # This creates ALL tables in your PostgreSQL database
         db.create_all()
-        print("DATABASE: All tables (Users, Items, Outfits, Donations) verified/created.")
+        print("DATABASE: All tables (Users, ClothingItems, Charities, Records) verified/created.")
 
     @login_manager.user_loader
     def load_user(user_id):
