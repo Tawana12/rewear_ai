@@ -25,18 +25,19 @@ login_manager = LoginManager()
 def create_app():
     app = Flask(__name__, template_folder="templates")
 
-    # --- RENDER / DEPLOYMENT DATABASE LOGIC ---
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    
-    # Render/Postgres strings often start with 'postgres://' 
-    # but SQLAlchemy 1.4+ requires 'postgresql://'
+    # --- DATABASE LOGIC ---
     db_url = os.getenv('DATABASE_URL')
-    if db_url and db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
     
-    # Fallback to SQLite if no DATABASE_URL is set
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_url or f'sqlite:///{os.path.join(basedir, "rewear.db")}'
-    
+    if db_url:
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+        print("DATABASE: Connecting to PostgreSQL...")
+    else:
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "rewear.db")}'
+        print("DATABASE: Fallback to local SQLite...")
+
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_secret_key_123')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_PERMANENT'] = False
@@ -49,9 +50,20 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
-    from rewear_ai.wardrobe.models import User
+    # --- THE CRITICAL FIX: IMPORT ALL MODELS FOR TABLE CREATION ---
+    with app.app_context():
+        # We import every model file so SQLAlchemy registers the tables
+        from rewear_ai.wardrobe.models import User, Item
+        from rewear_ai.outfit.models import Outfit
+        from rewear_ai.donate.models import Donation
+        
+        # This will now create ALL tables in the Postgres DB
+        db.create_all()
+        print("DATABASE: All tables (Users, Items, Outfits, Donations) verified/created.")
+
     @login_manager.user_loader
     def load_user(user_id):
+        from rewear_ai.wardrobe.models import User
         return db.session.get(User, int(user_id))
 
     # --- Register Blueprints ---
