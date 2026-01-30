@@ -1,0 +1,18 @@
+# Web Framework
+Flask
+Flask-Login
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Bcrypt
+
+# AI & Images
+google-generativeai
+Pillow
+python-dotenv
+
+# Deployment & Database
+gunicorn
+psycopg2-binary
+
+# Core Utilities
+requests

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-12">
+    <div class="bg-gray-50 rounded-3xl p-8 mb-12 flex flex-col md:flex-row justify-between items-center border border-gray-100 gap-6">
+        <div id="weather-box" class="opacity-50 transition-opacity duration-700">
+            <h2 id="radar-status" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Syncing Radar...</h2>
+            <div class="flex items-baseline gap-4">
+                <span id="temp-val" class="text-6xl font-light tracking-tighter">--°C</span>
+                <span id="cond-val" class="text-xl text-gray-400 italic">Detecting...</span>
+            </div>
+        </div>
+        
+        <div class="flex gap-2 bg-white p-2 rounded-full shadow-sm">
+            {% for occ in ['Casual', 'Work', 'Evening', 'Sport'] %}
+            <a href="?occasion={{ occ }}" class="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all
+               {{ 'bg-black text-white' if occasion == occ else 'text-gray-400 hover:text-black' }}">
+                {{ occ }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if outfit %}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div class="lg:col-span-8 grid grid-cols-2 gap-4">
+            <div class="bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 aspect-[3/4] relative">
+                <img src="{{ url_for('static', filename='uploads/' + outfit.top.image_file) }}" class="w-full h-full object-cover">
+                <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded text-[10px] font-bold uppercase">{{ outfit.top.name }}</div>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 aspect-square relative">
+                    <img src="{{ url_for('static', filename='uploads/' + outfit.bottom.image_file) }}" class="w-full h-full object-cover">
+                    <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded text-[10px] font-bold uppercase">{{ outfit.bottom.name }}</div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 aspect-square relative">
+                    {% if outfit.outerwear %}
+                        <img src="{{ url_for('static', filename='uploads/' + outfit.outerwear.image_file) }}" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-black text-white text-[8px] font-bold px-2 py-1 rounded-full uppercase">Layer Needed</div>
+                        <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded text-[10px] font-bold uppercase">{{ outfit.outerwear.name }}</div>
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' + outfit.shoes.image_file) }}" class="w-full h-full object-cover">
+                        <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded text-[10px] font-bold uppercase">{{ outfit.shoes.name }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-4 flex flex-col justify-center">
+            <h3 class="text-3xl font-bold tracking-tighter italic mb-4">Daily Choice</h3>
+            <p id="ai-description" class="text-gray-500 text-sm leading-relaxed mb-8">
+                Your wardrobe is being analyzed based on current weather conditions.
+            </p>
+            
+            <div class="p-6 bg-gray-50 rounded-2xl mb-8 border border-gray-100">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Sustainability Impact</p>
+                <p class="text-xs text-gray-600">By wearing these items again, you've saved approximately <span class="text-black font-bold">0.4kg of CO2</span> today.</p>
+            </div>
+
+            <button onclick="window.location.reload()" class="w-full py-4 bg-black text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-all">
+                🔄 Re-Style
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-24 bg-gray-50 rounded-3xl border border-dashed">
+        <p class="text-gray-400">Add more items for the <b>{{ occasion }}</b> occasion to unlock styling.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    window.onload = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(updateWeather);
+        }
+    };
+
+    function updateWeather(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        
+        fetch(`/style/api/weather?lat=${lat}&lon=${lon}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('temp-val').innerText = data.temp + "°C";
+                document.getElementById('cond-val').innerText = data.condition;
+                document.getElementById('radar-status').innerText = "Radar Active";
+                document.getElementById('weather-box').classList.remove('opacity-50');
+                
+                // Refresh logic to pass temp to Python for outerwear logic
+                const urlParams = new URLSearchParams(window.location.search);
+                if (!urlParams.has('temp')) {
+                    urlParams.set('temp', data.temp);
+                    window.location.search = urlParams.toString();
+                }
+            });
+    }
+</script>
+{% endblock %}

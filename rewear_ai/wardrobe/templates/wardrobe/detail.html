@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <nav class="mb-8 text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">
+        <a href="{{ url_for('wardrobe.index') }}" class="hover:text-black transition-colors">Wardrobe</a> / {{ item.category }}
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div class="bg-gray-50 rounded-[3rem] overflow-hidden border border-gray-100 shadow-sm sticky top-24">
+            <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" 
+                 class="w-full h-auto object-cover hover:scale-105 transition-transform duration-700">
+        </div>
+
+        <div class="flex flex-col">
+            <h1 class="text-6xl font-bold tracking-tighter mb-2">{{ item.name }}</h1>
+            <p class="text-2xl text-gray-400 italic mb-10">{{ item.color }} — {{ item.season }}</p>
+
+            <div class="bg-gray-900 rounded-[2.5rem] p-10 text-white mb-10 relative overflow-hidden shadow-2xl">
+                <div class="absolute top-6 right-8 text-3xl opacity-40">✨</div>
+                
+                <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-6">AI Style Intelligence</p>
+                
+                <div class="mb-8">
+                    <h4 class="text-[10px] uppercase tracking-widest text-gray-500 mb-2 font-bold">Celebrity Style Twin</h4>
+                    <p class="text-2xl font-bold tracking-tight text-white">{{ item.celeb_twin or "Vibe Detected" }}</p>
+                </div>
+
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-widest text-gray-500 mb-2 font-bold">Pro Styling Tip</h4>
+                    <p class="text-md text-gray-300 leading-relaxed italic border-l-2 border-green-500 pl-4">
+                        "{{ item.styling_tip or "Pair this with neutral tones to let the item stand out." }}"
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-10">
+                <div class="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                    <h4 class="text-[10px] font-bold uppercase mb-2 tracking-widest text-gray-400">Occasion</h4>
+                    <span class="inline-block px-4 py-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest rounded-full">{{ item.occasion }}</span>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                    <h4 class="text-[10px] font-bold uppercase mb-2 tracking-widest text-gray-400">Wear Count</h4>
+                    <p class="text-3xl font-bold tracking-tighter">{{ item.times_worn }} Wears</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 border-t border-gray-100 pt-10">
+                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">Circular Economy Actions</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <a href="{{ url_for('upcycle.upcycle_item', item_id=item.id) }}" 
+                       class="flex items-center justify-center gap-2 bg-white border-2 border-black px-8 py-5 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all group shadow-sm">
+                        <span>Revive with AI Upcycling</span>
+                        <svg class="w-3 h-3 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                    </a>
+
+                    <a href="{{ url_for('donate.find_home', item_id=item.id) }}" 
+                       class="flex items-center justify-center bg-green-50 text-green-700 border border-green-100 px-8 py-5 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-green-700 hover:text-white transition-all shadow-sm">
+                        Find a Place of Need
+                    </a>
+                </div>
+
+                <div class="flex gap-4 mt-6">
+                    <a href="{{ url_for('wardrobe.edit', id=item.id) }}" 
+                       class="flex-1 text-center bg-gray-100 px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-all text-gray-600">
+                        Edit Item
+                    </a>
+                    
+                    <form action="{{ url_for('wardrobe.delete', id=item.id) }}" method="POST" class="flex-1" onsubmit="return confirm('Remove this item permanently from your digital wardrobe?');">
+                        <button type="submit" class="w-full bg-red-50 text-red-600 px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

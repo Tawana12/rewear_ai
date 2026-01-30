@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REWEAR AI</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-white min-h-screen flex flex-col">
+
+    <nav class="border-b border-gray-100 py-6 px-8 flex justify-between items-center bg-white sticky top-0 z-50">
+        <div class="flex items-center gap-8">
+            <a href="/" class="text-xl font-bold tracking-tighter italic">REWEAR AI</a>
+            
+            <div class="flex gap-6 items-center">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('wardrobe.index') }}" class="text-xs uppercase tracking-widest font-semibold hover:opacity-50 transition-opacity">Wardrobe</a>
+                    <a href="{{ url_for('wardrobe.add') }}" class="text-xs uppercase tracking-widest font-semibold hover:opacity-50 transition-opacity">Add Item</a>
+                    <a href="{{ url_for('donate.find_home') }}" class="text-xs uppercase tracking-widest font-semibold hover:opacity-50 transition-opacity">Donate</a>
+                    
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="text-xs uppercase tracking-widest font-bold text-red-600 hover:opacity-50 transition-opacity border-l pl-6 border-gray-200">Admin Panel</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            {% if current_user.is_authenticated %}
+                <div class="flex items-center gap-4">
+                    <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mr-2">{{ current_user.username }}</span>
+                    <a href="{{ url_for('outfit.dashboard') }}" class="bg-black text-white text-[10px] px-6 py-2 rounded-full uppercase tracking-widest font-bold hover:bg-gray-800 transition-all active:scale-95">
+                        Style Me
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="text-[10px] uppercase tracking-widest font-bold text-gray-400 hover:text-black transition-colors ml-2">
+                        Logout
+                    </a>
+                </div>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="text-[10px] uppercase tracking-widest font-bold hover:opacity-50">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="bg-black text-white text-[10px] px-6 py-2 rounded-full uppercase tracking-widest font-bold hover:bg-gray-800 transition-all">
+                    Join
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div id="flash-container" class="fixed top-24 right-8 z-[60] flex flex-col gap-3 max-w-md">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-item transform transition-all duration-500 ease-in-out p-4 rounded-xl shadow-2xl border flex items-center gap-3 min-w-[300px]
+                {% if category == 'success' %}bg-white border-green-100 text-green-800
+                {% elif category == 'danger' %}bg-white border-red-100 text-red-800
+                {% elif category == 'warning' %}bg-white border-yellow-100 text-yellow-800
+                {% else %}bg-white border-gray-100 text-gray-800{% endif %}">
+                
+                <span class="text-lg">
+                    {% if category == 'success' %}✅{% elif category == 'danger' %}❌{% else %}ℹ️{% endif %}
+                </span>
+                
+                <span class="text-xs font-bold uppercase tracking-widest">
+                    {{ message }}
+                </span>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="flex-grow transition-all duration-500">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mt-20 py-10 border-t border-gray-100 text-center">
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest">
+            © 2026 REWEAR AI • Responsible Consumption (SDG 12) • Harare, ZW
+        </p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashMessages = document.querySelectorAll('.flash-item');
+            
+            flashMessages.forEach((msg) => {
+                // 1. Initial entrance state
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(-20px)';
+                
+                // 2. Animate In
+                setTimeout(() => {
+                    msg.style.opacity = '1';
+                    msg.style.transform = 'translateY(0)';
+                }, 100);
+
+                // 3. Animate Out and remove after 5 seconds
+                setTimeout(() => {
+                    msg.style.opacity = '0';
+                    msg.style.transform = 'translateX(50px)';
+                    
+                    setTimeout(() => {
+                        msg.remove();
+                    }, 500); // Wait for transition to finish
+                }, 5000); 
+            });
+        });
+    </script>
+</body>
+</html>

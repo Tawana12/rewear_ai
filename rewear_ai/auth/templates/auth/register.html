@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto px-6 py-20">
+    <div class="text-center mb-12">
+        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2">Join the Movement</p>
+        <h1 class="text-5xl font-bold tracking-tighter">Create Account</h1>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        <div>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-4 mb-2 block">Username</label>
+            <input type="text" name="username" required 
+                   class="w-full p-5 bg-gray-50 border-none rounded-[2rem] focus:ring-2 focus:ring-black transition-all" 
+                   placeholder="e.g. DavidStyle">
+        </div>
+        
+        <div>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-4 mb-2 block">Email Address</label>
+            <input type="email" name="email" required 
+                   class="w-full p-5 bg-gray-50 border-none rounded-[2rem] focus:ring-2 focus:ring-black transition-all" 
+                   placeholder="name@example.com">
+        </div>
+
+        <div>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-4 mb-2 block">Secure Password</label>
+            <input type="password" name="password" required 
+                   class="w-full p-5 bg-gray-50 border-none rounded-[2rem] focus:ring-2 focus:ring-black transition-all" 
+                   placeholder="••••••••">
+        </div>
+
+        <button type="submit" 
+                class="w-full py-5 bg-black text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl">
+            Register for Access
+        </button>
+    </form>
+
+    <div class="mt-8 text-center">
+        <p class="text-xs text-gray-500">Already a member? <a href="{{ url_for('auth.login') }}" class="font-bold text-black border-b border-black">Sign In</a></p>
+    </div>
+</div>
+{% endblock %}

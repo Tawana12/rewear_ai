@@ -1,0 +1,38 @@
+{% macro render_item(item) %}
+<div class="group relative bg-white border border-gray-100 rounded-xl overflow-hidden transition-all hover:shadow-lg">
+    <div class="aspect-[3/4] bg-gray-50 overflow-hidden">
+        {% if item.image_file %}
+            <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" 
+                 alt="{{ item.name }}" 
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        {% else %}
+            <div class="w-full h-full flex items-center justify-center text-gray-300">
+                <span class="text-xs uppercase tracking-widest">No Image</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="p-4">
+        <div class="flex justify-between items-start mb-1">
+            <h3 class="text-sm font-medium text-gray-900">{{ item.name }}</h3>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase tracking-tighter">
+                {{ item.occasion or 'General' }}
+            </span>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">{{ item.category }} • {{ item.color }}</p>
+        
+        <div class="flex gap-2">
+            <a href="{{ url_for('wardrobe.detail', id=item.id) }}" 
+               class="flex-1 text-center py-2 text-xs border border-black hover:bg-black hover:text-white transition-colors">
+                View
+            </a>
+            <form action="{{ url_for('wardrobe.delete', id=item.id) }}" method="POST" class="inline">
+                <button type="submit" class="px-3 py-2 text-xs border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-500 transition-colors" 
+                        onclick="return confirm('Are you sure?')">
+                    ✕
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endmacro %}

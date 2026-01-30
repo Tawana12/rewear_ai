@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-6 form-card">
+    <div class="mb-10 text-center">
+        <h2 class="text-3xl font-bold tracking-tighter italic">Add to Wardrobe</h2>
+        <p class="text-gray-500 text-sm mt-2">Upload your item to start building AI-powered outfits.</p>
+    </div>
+    
+    <form action="{{ url_for('wardrobe.add') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+        
+        <div class="space-y-2">
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400">Step 1: Visual Input</label>
+            <div class="file-upload-wrapper" id="drop-zone">
+                <div class="text-center">
+                    <div id="upload-icon" class="mb-2 text-2xl">📸</div>
+                    <div class="upload-text" id="upload-status">Click to upload clothing photo</div>
+                </div>
+                <input type="file" name="image" accept="image/*" onchange="previewImage(this)" required>
+            </div>
+            <div id="preview-container" class="hidden mt-4 flex justify-center">
+                <img id="image-preview" src="#" alt="Preview" class="h-40 w-auto rounded-lg shadow-sm border border-gray-100">
+            </div>
+        </div>
+
+        <div class="space-y-6 bg-gray-50 p-8 rounded-2xl border border-gray-100">
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-[-1rem]">Step 2: Details</label>
+            
+            <div class="grid grid-cols-1 gap-6">
+                <div>
+                    <label class="block text-xs font-semibold mb-2">Item Name</label>
+                    <input type="text" name="name" 
+                           class="w-full bg-white border border-gray-200 rounded-lg p-3 outline-none focus:border-black transition-colors" 
+                           placeholder="e.g. Vintage Oversized Blazer" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold mb-2">Category</label>
+                        <select name="category" class="w-full bg-white border border-gray-200 rounded-lg p-3 outline-none focus:border-black transition-colors cursor-pointer">
+                            <option value="Top">Top</option>
+                            <option value="Bottom">Bottom</option>
+                            <option value="Outerwear">Outerwear</option>
+                            <option value="Shoes">Shoes</option>
+                            <option value="Accessory">Accessory</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-2">Occasion</label>
+                        <select name="occasion" class="w-full bg-white border border-gray-200 rounded-lg p-3 outline-none focus:border-black transition-colors cursor-pointer">
+                            <option value="Casual">Casual</option>
+                            <option value="Work">Work</option>
+                            <option value="Sport">Sport</option>
+                            <option value="Evening">Evening/Event</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold mb-2">Color</label>
+                        <input type="text" name="color" placeholder="e.g. Navy"
+                               class="w-full bg-white border border-gray-200 rounded-lg p-3 outline-none focus:border-black transition-colors" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-2">Season</label>
+                        <select name="season" class="w-full bg-white border border-gray-200 rounded-lg p-3 outline-none focus:border-black transition-colors cursor-pointer">
+                            <option value="All Season">All Season</option>
+                            <option value="Summer">Summer</option>
+                            <option value="Winter">Winter</option>
+                            <option value="Spring/Fall">Spring/Fall</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4">
+            <button type="submit" id="submit-btn" class="w-full bg-black text-white py-5 rounded-full font-bold uppercase tracking-widest text-xs">
+                Add to Digital Wardrobe
+            </button>
+            <p class="text-center text-[10px] text-gray-400 mt-4 uppercase tracking-tighter">
+                Sustainability Tip: One new item, many new outfits.
+            </p>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.querySelector('form').onsubmit = function() {
+        const btn = document.getElementById('submit-btn');
+        btn.innerText = "AI is analyzing your style...";
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    };
+    function previewImage(input) {
+        const preview = document.getElementById('image-preview');
+        const container = document.getElementById('preview-container');
+        const statusText = document.getElementById('upload-status');
+        const icon = document.getElementById('upload-icon');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                container.classList.remove('hidden');
+                statusText.innerText = "Selected: " + input.files[0].name;
+                icon.innerText = "✅";
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+</script>
+{% endblock %}

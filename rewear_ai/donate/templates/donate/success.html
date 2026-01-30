@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-6 py-20 text-center">
+    <div class="mb-8 flex justify-center">
+        <div class="h-24 w-24 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
+            <span class="text-4xl">🌍</span>
+        </div>
+    </div>
+
+    <h1 class="text-5xl font-black italic tracking-tighter mb-4 text-black uppercase">
+        Impact Created.
+    </h1>
+    <p class="text-gray-500 text-lg mb-12">
+        You've officially successfully transitioned your clothing to a new chapter. 
+        Your contribution at <span class="font-bold text-black">{{ record.charity_name }}</span> is helping bridge the gap in sustainable fashion.
+    </p>
+
+    <div class="bg-white border-2 border-black rounded-[40px] p-10 mb-12 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            <div class="pb-6 md:pb-0">
+                <p class="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-2">Item Donated</p>
+                <h3 class="text-2xl font-bold">{{ record.item_name }}</h3>
+                <p class="text-gray-400 text-sm italic">{{ record.category }}</p>
+            </div>
+            <div class="pt-6 md:pt-0">
+                <p class="text-[10px] font-black uppercase tracking-widest text-green-600 mb-2">Impact Points</p>
+                <h3 class="text-5xl font-black">+{{ record.impact_score }}</h3>
+                <p class="text-gray-400 text-sm italic">Added to your leaderboard</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{{ url_for('wardrobe.index') }}" 
+           class="bg-black text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all">
+            Back to Wardrobe
+        </a>
+        <a href="#" 
+           class="bg-gray-100 text-black px-10 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gray-200 transition-all">
+            Share Impact 🔗
+        </a>
+    </div>

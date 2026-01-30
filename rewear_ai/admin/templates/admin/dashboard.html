@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-12">
+    <div class="flex justify-between items-end mb-12">
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2">System Management</p>
+            <h1 class="text-6xl font-bold tracking-tighter">Admin Control</h1>
+        </div>
+        <div class="bg-black text-white px-6 py-2 rounded-full text-[10px] font-bold uppercase">
+            Admin Status: Active
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="p-10 bg-gray-50 rounded-[2.5rem] border border-gray-100">
+            <h4 class="text-[10px] uppercase font-bold text-gray-400 mb-1">Total Community Members</h4>
+            <p class="text-5xl font-bold tracking-tighter">{{ users }}</p>
+        </div>
+        <div class="p-10 bg-gray-50 rounded-[2.5rem] border border-gray-100">
+            <h4 class="text-[10px] uppercase font-bold text-gray-400 mb-1">Global Donations</h4>
+            <p class="text-5xl font-bold tracking-tighter text-green-600">{{ donations }}</p>
+        </div>
+        <div class="p-10 bg-gray-50 rounded-[2.5rem] border border-gray-100">
+            <h4 class="text-[10px] uppercase font-bold text-gray-400 mb-1">Items Tracked</h4>
+            <p class="text-5xl font-bold tracking-tighter">{{ clothes }}</p>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-12">
+        <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+            <h3 class="text-2xl font-bold mb-8">Add Verified Charity</h3>
+            <form action="{{ url_for('admin.add_charity') }}" method="POST" class="space-y-4">
+                <input type="text" name="name" placeholder="Name (e.g., Matthew Rusike Home)" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black">
+                <input type="text" name="address" placeholder="Physical Address" class="w-full p-4 bg-gray-50 rounded-2xl border-none">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" name="lat" placeholder="Latitude" class="p-4 bg-gray-50 rounded-2xl border-none">
+                    <input type="text" name="lon" placeholder="Longitude" class="p-4 bg-gray-50 rounded-2xl border-none">
+                </div>
+                <button type="submit" class="w-full py-5 bg-black text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-all">
+                    Register Verified Home
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-gray-900 p-10 rounded-[3rem] text-white overflow-hidden relative">
+             <h3 class="text-2xl font-bold mb-8">Verified Places of Need</h3>
+             <ul class="space-y-4">
+                {% for charity in charities %}
+                <li class="flex justify-between items-center border-b border-gray-800 pb-4">
+                    <div>
+                        <p class="font-bold">{{ charity.name }}</p>
+                        <p class="text-xs text-gray-500">{{ charity.address }}</p>
+                    </div>
+                    <span class="text-[9px] font-bold text-green-500 uppercase">Verified</span>
+                </li>
+                {% endfor %}
+             </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

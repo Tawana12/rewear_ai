@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root {
+    --bg-color: #ffffff;
+    --text-main: #000000;
+    --text-muted: #666666;
+    --accent: #000000;
+    --soft-gray: #f3f3f1; /* Slightly warmer for a premium feel */
+}
+
+/* Give the app some breathing room */
+main {
+    padding-top: 5vh; /* Moves form away from the very top */
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- CUSTOM FILE INPUT --- */
+.file-upload-wrapper {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: var(--soft-gray);
+}
+
+.file-upload-wrapper:hover {
+    border-color: var(--accent);
+    background: #efefed;
+}
+
+.file-upload-wrapper input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Hides the ugly default button */
+    cursor: pointer;
+}
+
+.upload-text {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* --- FORM SPACING --- */
+.form-card {
+    margin-bottom: 100px; /* Space before footer */
+}
+
+/* Rest of your existing animations/styles... */
+.item-card { transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.item-card:hover { transform: translateY(-8px); }
+.flash-messages { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+.flash-item { padding: 12px 24px; border-radius: 8px; background: black; color: white; font-size: 0.85rem; animation: slideIn 0.3s ease forwards; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
