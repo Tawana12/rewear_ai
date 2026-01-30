@@ -6,7 +6,7 @@ from rewear_ai.app import db
 
 donate = Blueprint('donate', __name__, template_folder='templates')
 
-# --- GLOBAL API SEARCH ---
+# --- GLOBAL API SEARCH (Overpass API for Nearby Charities) ---
 @donate.route('/api/nearby')
 @login_required
 def nearby_charities():
@@ -16,11 +16,13 @@ def nearby_charities():
 
     results = []
     try:
+        # 1. Start with verified partners from our own Database
         local_db_partners = Charity.query.all()
         results = [c.to_dict() for c in local_db_partners]
     except Exception as e:
         print(f"Database Fetch Error: {e}")
 
+    # 2. Add real-world data from OpenStreetMap (Overpass API)
     if lat and lon:
         overpass_url = "https://overpass-api.de/api/interpreter"
         overpass_query = f"""
@@ -42,6 +44,7 @@ def nearby_charities():
                 tags = element.get('tags', {})
                 name = tags.get('name') or tags.get('official_name') or "Community Support Center"
                 
+                # Avoid duplicates if a charity is in both DB and OSM
                 if any(r['name'].lower() == name.lower() for r in results):
                     continue
 
@@ -59,46 +62,48 @@ def nearby_charities():
 
 # --- PAGES ---
 
-# ⭐ FIXED: Added dual routes and default item_id=None to prevent Navbar BuildErrors
 @donate.route('/find')
 @donate.route('/find/<int:item_id>') 
 @login_required
-def find_home(item_id=None): 
-    """The main interactive map/list page to find a place of need."""
+def index(item_id=None): 
+    """The main interactive map/list page. Function named 'index' for standard linking."""
     return render_template('donate/find_home.html', item_id=item_id)
 
 @donate.route('/log/<int:item_id>', methods=['POST'])
 @login_required
 def log_donation(item_id):
+    """Processes the donation, removes it from wardrobe, and adds to impact history."""
     selected_home = request.form.get('charity_name', 'Local Community Center')
     
-    # Check if we are donating a specific wardrobe item or just a general donation
-    if item_id != 0:
+    # Check if we are donating a specific wardrobe item
+    if item_id and item_id != 0:
         item = ClothingItem.query.filter_by(id=item_id, user_id=current_user.id).first()
         if not item:
             flash("Item not found in your wardrobe.", "danger")
-            return redirect(url_for('wardrobe.index')) # Redirect back to wardrobe
+            return redirect(url_for('wardrobe.index'))
         
         item_name = item.name
         category = item.category
     else:
-        # Fallback for general donations (item_id is 0)
+        # Fallback for general/anonymous donations
         item_name = "General Clothing Items"
         category = "Mixed"
-        item = None # So we don't try to delete it later
+        item = None
 
     new_record = DonationRecord(
         item_name=item_name,
         category=category,
         charity_name=selected_home,
         user_id=current_user.id,
-        impact_score=15 
+        impact_score=15 # Sustainability points
     )
     
     try:
         db.session.add(new_record)
+        # 🛡️ THE SUSTAINABLE ACTION: Remove from user's current closet
         if item:
-            db.session.delete(item) # Only delete if a real item was found
+            db.session.delete(item) 
+        
         db.session.commit()
         
         flash(f"Amazing! You've logged your donation to {selected_home}.", "success")
@@ -108,7 +113,8 @@ def log_donation(item_id):
         db.session.rollback()
         print(f"Donation Error: {e}")
         flash("Could not process donation. Please try again.", "danger")
-        return redirect(url_for('donate.find_home'))
+        return redirect(url_for('donate.index'))
+
 @donate.route('/success/<int:record_id>')
 @login_required
 def donation_success(record_id):
