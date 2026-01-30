@@ -44,7 +44,6 @@ def nearby_charities():
                 tags = element.get('tags', {})
                 name = tags.get('name') or tags.get('official_name') or "Community Support Center"
                 
-                # Avoid duplicates if a charity is in both DB and OSM
                 if any(r['name'].lower() == name.lower() for r in results):
                     continue
 
@@ -65,18 +64,25 @@ def nearby_charities():
 @donate.route('/find')
 @donate.route('/find/<int:item_id>') 
 @login_required
-def index(item_id=None): 
-    """The main interactive map/list page. Function named 'index' for standard linking."""
+def index(item_id=0): 
+    """
+    Main interactive page. Defaults item_id to 0 for navbar clicks 
+    to prevent 'BuildError' or mandatory ID requirements.
+    """
     return render_template('donate/find_home.html', item_id=item_id)
 
 @donate.route('/log/<int:item_id>', methods=['POST'])
 @login_required
 def log_donation(item_id):
-    """Processes the donation, removes it from wardrobe, and adds to impact history."""
+    """
+    Processes the donation. 
+    If item_id > 0, it removes the specific item from the user's wardrobe.
+    If item_id is 0, it logs a general donation.
+    """
     selected_home = request.form.get('charity_name', 'Local Community Center')
     
     # Check if we are donating a specific wardrobe item
-    if item_id and item_id != 0:
+    if item_id and item_id > 0:
         item = ClothingItem.query.filter_by(id=item_id, user_id=current_user.id).first()
         if not item:
             flash("Item not found in your wardrobe.", "danger")
@@ -85,8 +91,8 @@ def log_donation(item_id):
         item_name = item.name
         category = item.category
     else:
-        # Fallback for general/anonymous donations
-        item_name = "General Clothing Items"
+        # Handles 'General Donation' from Navbar (item_id is 0)
+        item_name = "General Clothing Bundle"
         category = "Mixed"
         item = None
 
@@ -95,12 +101,12 @@ def log_donation(item_id):
         category=category,
         charity_name=selected_home,
         user_id=current_user.id,
-        impact_score=15 # Sustainability points
+        impact_score=15 if item else 10 # 15 points for wardrobe items, 10 for general
     )
     
     try:
         db.session.add(new_record)
-        # 🛡️ THE SUSTAINABLE ACTION: Remove from user's current closet
+        # 🛡️ THE SUSTAINABLE ACTION: Delete from closet only if it came from the wardrobe
         if item:
             db.session.delete(item) 
         
@@ -113,7 +119,7 @@ def log_donation(item_id):
         db.session.rollback()
         print(f"Donation Error: {e}")
         flash("Could not process donation. Please try again.", "danger")
-        return redirect(url_for('donate.index'))
+        return redirect(url_for('donate.index', item_id=item_id))
 
 @donate.route('/success/<int:record_id>')
 @login_required

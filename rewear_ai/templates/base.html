@@ -19,8 +19,9 @@
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('wardrobe.index') }}" class="text-xs uppercase tracking-widest font-semibold hover:opacity-50 transition-opacity">Wardrobe</a>
                     <a href="{{ url_for('wardrobe.add') }}" class="text-xs uppercase tracking-widest font-semibold hover:opacity-50 transition-opacity">Add Item</a>
-                    <!-- <a href="{{ url_for('donate.find_home') }}" class="text-xs uppercase tracking-widest font-semibold hover:opacity-50 transition-opacity">Donate</a>
-                     -->
+                    
+                    <a href="{{ url_for('donate.index', item_id=0) }}" class="text-xs uppercase tracking-widest font-semibold hover:opacity-50 transition-opacity">Donate</a>
+                    
                     {% if current_user.is_admin %}
                         <a href="{{ url_for('admin.dashboard') }}" class="text-xs uppercase tracking-widest font-bold text-red-600 hover:opacity-50 transition-opacity border-l pl-6 border-gray-200">Admin Panel</a>
                     {% endif %}
@@ -86,24 +87,24 @@
             const flashMessages = document.querySelectorAll('.flash-item');
             
             flashMessages.forEach((msg) => {
-                // 1. Initial entrance state
+                // Initial entrance state
                 msg.style.opacity = '0';
                 msg.style.transform = 'translateY(-20px)';
                 
-                // 2. Animate In
+                // Animate In
                 setTimeout(() => {
                     msg.style.opacity = '1';
                     msg.style.transform = 'translateY(0)';
                 }, 100);
 
-                // 3. Animate Out and remove after 5 seconds
+                // Animate Out and remove after 5 seconds
                 setTimeout(() => {
                     msg.style.opacity = '0';
                     msg.style.transform = 'translateX(50px)';
                     
                     setTimeout(() => {
                         msg.remove();
-                    }, 500); // Wait for transition to finish
+                    }, 500); 
                 }, 5000); 
             });
         });
